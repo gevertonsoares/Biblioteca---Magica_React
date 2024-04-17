@@ -11,9 +11,19 @@ export const ModalContainer = styled.div`
     border-radius: 5px;
     padding: 20px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-    max-width: 50%;
-    max-height: 80%;
+    max-width: 70%;
+    max-height: 100%;
     
+    h2 {
+        position: relative;
+        display: inline-block;
+        font-size: 1.5rem; 
+        color: #ffff; 
+        margin-bottom: 1rem;
+        text-align: center;
+        padding: 0px;
+        margin: 0px;
+    }
 
     input {
         width: calc(100% - 44px);

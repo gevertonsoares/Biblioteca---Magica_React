@@ -36,9 +36,11 @@ export function MainHome() {
     const [genero, setGenero] = useState<string>("");
     const [descricao, setDescricao] = useState<string>("");
 
-    const [livroEditando, setLivroEditando] = useState<Livro | null>(null);
+    const [EditarLivro, setEditarLivro] = useState<Livro | null>(null);
     const [modalEditarAberto, setModalEditarAberto] = useState(false);
     
+    const [modalDetalhesAberto, setModalDetalhesAberto] = useState(false);
+
 
     //Use effect para capturar a data atual no formulario
     useEffect(() => {
@@ -46,13 +48,13 @@ export function MainHome() {
         const dataFormatada = `${dataAtual.getFullYear()}-${String(dataAtual.getMonth() + 1).padStart(2, '0')}-${String(dataAtual.getDate()).padStart(2, '0')}`;
 
         setDataCadastro(dataFormatada)
-    }, [titulo, autor, anoPublicacao, genero, descricao]);
+    }, []);
 
     //Modal editar
     function abrirModalEditar(livro: Livro) {
         
-        setLivroEditando(livro);
         setModalEditarAberto(true);
+        setEditarLivro(livro);
 
         setTitulo(livro.titulo);
         setAutor(livro.autor);
@@ -62,7 +64,7 @@ export function MainHome() {
     }
 
     function fecharModalEditar() {
-        setLivroEditando(null);
+        setEditarLivro(null);
         setModalEditarAberto(false);
 
         setTitulo("");
@@ -72,11 +74,30 @@ export function MainHome() {
         setDescricao("");
     }
 
-    function salvarEdicao() {
-        if (!livroEditando) return;
+    function abrirModalDetalhes(livro: Livro) {
+        setModalDetalhesAberto(true);
 
-        const livrosAtualizados = livros.map(livro => {
-            if (livro.id === livroEditando.id) {
+        setTitulo(livro.titulo);
+        setAutor(livro.autor);
+        setAnoPublicacao(livro.anoPublicacao);
+        setGenero(livro.genero);
+        setDescricao(livro.descricao);
+    }
+
+    function fecharModalDetalhes() {
+        setModalDetalhesAberto(false);
+        setTitulo("");
+        setAutor("");
+        setAnoPublicacao("");
+        setGenero("");
+        setDescricao("");
+    }
+
+    function salvarEdicao() {
+        if (!EditarLivro) return;
+
+        const atualizarLivro = livros.map(livro => {
+            if (livro.id === EditarLivro.id) {
                 return {
                     ...livro,
                     titulo,
@@ -89,11 +110,10 @@ export function MainHome() {
             return livro;
         });
 
-        setLivros(livrosAtualizados);
+        setLivros(atualizarLivro);
         fecharModalEditar();
         alert("Livro editado com sucesso!");
     }
-    //fim modal Editar
 
     function cadastrar(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault()
@@ -101,11 +121,11 @@ export function MainHome() {
         const anoAtual = new Date().getFullYear();
 
         if (parseInt(anoPublicacao) > anoAtual) {
-            alert(`O ano de publicação não pode ser em ${anoPublicacao} pois isso seria no futuro! Você é do`);
+            alert(`O ano de publicação não pode ser ${anoPublicacao} pois isso seria no futuro! Você é do futuro!?`);
             return;
         }
 
-        const novoLivro = { 
+        const novoLivro: Livro = { 
             id: generateUUID(), 
             titulo, 
             autor,
@@ -151,7 +171,7 @@ export function MainHome() {
                         <input type="text" name="autor" value={autor} onChange={(event) => setAutor(event.target.value)} required /> <br />
 
                         <label>Ano de Publicação</label> <br />
-                        <input type="text" name="anoPublicacao" value={anoPublicacao} onChange={(event) => setAnoPublicacao(event.target.value)} required /> <br />
+                        <input type="tel" name="anoPublicacao" value={anoPublicacao} onChange={(event) => setAnoPublicacao(event.target.value)} required /> <br />
 
                         <label>Data de Cadastro</label> <br />
                         <input type="text" name="dataCadastro" value={dataCadastro} onChange={(event) => setDataCadastro(event.target.value)} disabled required /> <br />
@@ -176,7 +196,8 @@ export function MainHome() {
                                 <p><b>Titulo:</b> {livro.titulo}</p>
                                 <p><b>Autor:</b> {livro.autor}</p>
                                 <p><b>Ano de Publicação:</b> {livro.anoPublicacao}</p>
-                                <button onClick={() => abrirModalEditar(livro)}>Detalhes/Editar</button>
+                                <button onClick={() => abrirModalDetalhes(livro)}>Detalhes</button>
+                                <button onClick={() => abrirModalEditar(livro)}>Editar</button>
                                 <button onClick={() => excluirLivro(livro.id)}>Excluir</button>
                             </li>
                         ))}
@@ -197,6 +218,9 @@ export function MainHome() {
                         <label>Ano de Publicação</label> <br />
                         <input type="text" name="anoPublicacao" value={anoPublicacao} onChange={(event) => setAnoPublicacao(event.target.value)} required /> <br />
 
+                        <label>Data de Cadastro</label> <br />
+                        <input type="text" name="dataCadastro" value={dataCadastro}  disabled  /> <br />
+                        
                         <label>Gênero</label> <br />
                         <input type="text" name="genero" value={genero} onChange={(event) => setGenero(event.target.value)} required /> <br />
 
@@ -205,7 +229,19 @@ export function MainHome() {
 
                         <button type="submit">Salvar</button>
                         <button type="button" onClick={fecharModalEditar}>Cancelar</button>
-                </form>
+                    </form>
+                </ModalContainer>
+            </Modal>
+
+            <Modal isOpen={modalDetalhesAberto} onRequestClose={fecharModalDetalhes} style={customModalStyle} contentLabel="Detalhes">
+                <ModalContainer>
+                    <h2>Detalhes do livro - {titulo}</h2>
+                        <p><b>Autor:</b> {autor} </p>
+                        <p><b>Ano de Publicação:</b> {anoPublicacao}</p>
+                        <p><b>Data de Cadastro:</b> {dataCadastro}</p>
+                        <p><b>Gênero:</b> {genero}</p>
+                        <p><b>Descrição:</b> {descricao}</p>
+                        <button type="button" onClick={fecharModalDetalhes}>Fechar</button>
                 </ModalContainer>
             </Modal>
 

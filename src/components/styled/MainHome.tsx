@@ -31,6 +31,10 @@ export const MainHome = styled.div`
         list-style: none;
     }
 
+    p {
+        margin-top: 0.5rem;
+    }
+
     .lista-livros li {
         background-color: #7BAF9E;
         border: solid 2px #000075;
